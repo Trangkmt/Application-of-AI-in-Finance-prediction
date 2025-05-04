@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kết quả Dự đoán</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/result.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Kết quả Dự đoán</h1>
+        
+        <div class="result">
+            <div class="rating {% if result.rating == 'Tốt' %}rating-good{% elif result.rating == 'TB' %}rating-medium{% else %}rating-bad{% endif %}">
+                {{ result.rating }}
+            </div>
+            <div class="probability">
+                Xác suất Tốt: {{ result.probability }}
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <a href="/"><button>Quay lại</button></a>
+        </div>
+        
+        <div class="footer-note">
+            Dự đoán dựa trên mô hình Machine Learning được huấn luyện với dữ liệu tài chính
+        </div>
+    </div>
+</body>
+</html>
