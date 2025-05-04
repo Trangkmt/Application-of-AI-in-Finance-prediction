@@ -1,89 +1,143 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>View Report - {{ filename }}</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            background-image: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            animation: fadeIn 0.5s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        pre {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #333;
-            border: 1px solid #e9ecef;
-            box-shadow: inset 0 1px 5px rgba(0,0,0,0.05);
-        }
-        .buttons {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-        }
-        .button {
-            display: inline-block;
-            background-color: #2196f3;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.2);
-        }
-        .button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(33, 150, 243, 0.3);
-        }
-        .download-btn {
-            background-color: #4caf50;
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>{{ filename }}</h1>
-        
-        <pre>{{ content }}</pre>
-        
-        <div class="buttons">
-            <a href="/download_report/{{ session_id }}/{{ model_name }}" class="button download-btn" download>Download Report</a>
-            <a href="/view_prediction_results/{{ session_id }}" class="button">Back to Dashboard</a>
-            <a href="/" class="button">Home</a>
+<!-- c:\Studii\ud-AI\templates\view_report.html -->
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="result-container animation-fade-in">
+    <div class="report-header-section">
+        <div class="model-badge">
+            <span class="badge bg-gradient">{{ model }}</span>
+        </div>
+        <h1 class="text-center mb-4">Báo cáo phân loại chi tiết</h1>
+        <div class="session-info">
+            <span class="session-badge">Mã phiên: {{ session_id }}</span>
         </div>
     </div>
-</body>
-</html>
+    
+    <div class="breadcrumb-navigation mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('view_prediction_results', session_id=session_id) }}">Kết quả phân tích</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ model }} - Báo cáo phân loại</li>
+            </ol>
+        </nav>
+    </div>
+    
+    <!-- Metrics summary -->
+    <div class="metrics-summary-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-line me-2"></i>Tóm tắt chỉ số</h2>
+        </div>
+        <div class="card-body">
+            <div class="visual-metrics">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="metric-box accuracy-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="metric-value">{{ accuracy }}</div>
+                            <div class="metric-label">Độ chính xác</div>
+                            <div class="metric-desc">Tỉ lệ dự đoán đúng trên tổng số mẫu</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="metric-box precision-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-crosshairs"></i>
+                            </div>
+                            <div class="metric-value">{{ precision }}</div>
+                            <div class="metric-label">Độ chính xác dự đoán</div>
+                            <div class="metric-desc">Tỉ lệ dự đoán đúng trong các mẫu được dự đoán</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="metric-box recall-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="metric-value">{{ recall }}</div>
+                            <div class="metric-label">Độ bao phủ</div>
+                            <div class="metric-desc">Tỉ lệ mẫu thực tế được phát hiện chính xác</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="metric-box f1-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="metric-value">{{ f1 }}</div>
+                            <div class="metric-label">Điểm F1</div>
+                            <div class="metric-desc">Trung bình điều hòa của precision và recall</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed report -->
+    <div class="detailed-report-section mt-5">
+        <h3 class="report-title section-title">
+            <i class="fas fa-file-alt me-2"></i> Chi tiết báo cáo phân loại
+            <div class="float-end">
+                <a href="{{ url_for('download_report', session_id=session_id, model_name=model) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-download me-2"></i> Tải về báo cáo
+                </a>
+            </div>
+        </h3>
+        
+        <div class="report-container animation-fade-in">
+            <div class="report-header">
+                <div class="report-info">
+                    <div class="badge badge-primary">Mô hình: {{ model }}</div>
+                    <div class="badge badge-info">Mã phiên: {{ session_id }}</div>
+                    <div class="badge badge-light">Ngày: {{ now.strftime('%d/%m/%Y') if now else 'Hôm nay' }}</div>
+                </div>
+            </div>
+            <pre class="report-content" id="report-content">{{ report }}</pre>
+        </div>
+        
+        <div class="report-explanation mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Giải thích báo cáo</h5>
+                    <ul class="explanation-list">
+                        <li><strong>Precision:</strong> Tỷ lệ dự đoán đúng trong các mẫu được dự đoán thuộc một lớp</li>
+                        <li><strong>Recall:</strong> Tỷ lệ mẫu của một lớp được phát hiện chính xác</li>
+                        <li><strong>F1-score:</strong> Trung bình điều hòa của Precision và Recall</li>
+                        <li><strong>Support:</strong> Số lượng mẫu thực tế của mỗi lớp</li>
+                    </ul>
+                    <p class="mb-0 mt-2"><small>Các giá trị càng gần 1.0 càng tốt. Báo cáo này giúp đánh giá hiệu suất phân loại của mô hình trên từng lớp.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="action-card mt-5 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-arrow-circle-right me-2"></i> Các bước tiếp theo</h5>
+                <p class="card-text">Bạn có thể xem chi tiết dự đoán hoặc quay lại kết quả tổng quan để tiếp tục phân tích.</p>
+                <div class="action-buttons">
+                    <a href="{{ url_for('view_prediction_results', session_id=session_id) }}" class="btn btn-primary btn-action">
+                        <i class="fas fa-arrow-left me-2"></i> Quay lại kết quả
+                    </a>
+                    <a href="{{ url_for('view_csv', session_id=session_id) }}" class="btn btn-success btn-action">
+                        <i class="fas fa-table me-2"></i> Xem dự đoán chi tiết
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-action">
+                        <i class="fas fa-home me-2"></i> Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
