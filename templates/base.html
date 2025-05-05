@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân Tích Tài Chính Doanh Nghiệp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Fira+Code&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-graph-up"></i> Phân Tích Tài Chính
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Trang chủ</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text">
+                        <i class="bi bi-info-circle"></i> Hệ thống đánh giá tài chính doanh nghiệp
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Nội dung chính -->
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show animation-fade-in">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">© 2023 Hệ thống Phân tích Tài Chính Doanh Nghiệp | Nhóm 3 con vịt</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Highlight active nav item
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

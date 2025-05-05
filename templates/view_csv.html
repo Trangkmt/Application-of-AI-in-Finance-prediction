@@ -1,0 +1,70 @@
+<!-- c:\Studii\ud-AI\templates\view_csv.html -->
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 animation-fade-in">
+    <h1 class="mb-4 section-title">Xem dữ liệu: {{ filename }}</h1>
+    
+    <div class="breadcrumb-navigation mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('view_prediction_results', session_id=session_id) }}">Kết quả phân tích</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Xem dữ liệu</li>
+            </ol>
+        </nav>
+    </div>
+    
+    {% if data is defined and data is not none %}
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-table me-2"></i> Bảng dữ liệu
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                {% for col in data.columns %}
+                                    <th>{{ col }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for _, row in data.iterrows() %}
+                                <tr>
+                                    {% for col in data.columns %}
+                                        <td>{{ row[col] }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> Không có dữ liệu để hiển thị.
+        </div>
+    {% endif %}
+    
+    <div class="action-buttons mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i class="bi bi-house-door me-1"></i> Về trang chủ
+        </a>
+        <a href="{{ url_for('view_prediction_results', session_id=session_id) }}" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại kết quả phân tích
+        </a>
+        {% if data is defined and data is not none %}
+        <a href="{{ url_for('download_csv', session_id=session_id, filename=filename) }}" class="btn btn-outline-primary">
+            <i class="bi bi-download me-1"></i> Tải xuống CSV
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

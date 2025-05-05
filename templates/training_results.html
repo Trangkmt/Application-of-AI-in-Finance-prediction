@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/training.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container animation-fade-in">
+    <h1 class="text-center mb-4 section-title">Kết quả huấn luyện mô hình</h1>
+    
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle-fill me-2"></i> Quá trình huấn luyện mô hình đã hoàn thành thành công!
+    </div>
+    
+    <div class="row">
+        {% for model in results.models_data %}
+        <div class="col-md-6 mb-4">
+            <div class="model-card">
+                <h3 class="text-center">{{ model.Model }}</h3>
+                
+                <div class="row mt-4">
+                    <div class="col-6 text-center">
+                        <div class="metric-value">{{ "%.2f"|format(model.Accuracy * 100) }}%</div>
+                        <div class="metric-label">Độ chính xác</div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <div class="metric-value">{{ "%.2f"|format(model.F1_macro * 100) }}%</div>
+                        <div class="metric-label">Điểm F1 (Macro)</div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <img src="{{ results.cm_paths[loop.index0] }}" alt="Ma trận nhầm lẫn" class="cm-image">
+                    <p class="mt-2">Ma trận nhầm lẫn</p>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{{ results.report_paths[loop.index0] }}" class="btn btn-outline-primary">
+                        <i class="bi bi-file-text me-1"></i> Xem báo cáo chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="actions-container">
+        <a href="{{ url_for('view_csv', session_id=results.session_id, filename='predictions_with_prob.csv') }}" class="btn btn-primary">
+            <i class="bi bi-table me-1"></i> Xem kết quả dự đoán
+        </a>
+        <a href="{{ url_for('download_csv', session_id=results.session_id, filename='predictions_with_prob.csv') }}" class="btn btn-outline-primary">
+            <i class="bi bi-download me-1"></i> Tải về kết quả dự đoán
+        </a>
+        <a href="{{ url_for('download_model', session_id=results.session_id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-download me-1"></i> Tải về mô hình
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i class="bi bi-house me-1"></i> Về trang chủ
+        </a>
+    </div>
+</div>
+{% endblock %}

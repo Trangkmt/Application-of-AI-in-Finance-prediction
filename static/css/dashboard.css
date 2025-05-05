@@ -1,0 +1,343 @@
+/* CSS cho trang dashboard kết quả phân tích */
+.dashboard-container {
+    margin-bottom: 50px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.session-badge {
+    font-size: 0.9rem;
+}
+
+.stats-overview-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.stats-overview-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.stats-overview-card .card-header {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 15px 15px 0 0;
+}
+
+.stats-overview-card .card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.stats-overview-card .card-body {
+    padding: 30px;
+}
+
+.stats-container {
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-right: 20px;
+    color: #3498db;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 50%;
+}
+
+.stat-content {
+    flex-grow: 1;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.total-samples .stat-icon {
+    color: #3498db;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.avg-prob .stat-icon {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.download-data .stat-icon {
+    color: #9b59b6;
+    background: rgba(155, 89, 182, 0.1);
+}
+
+.rating-distribution {
+    margin-top: 40px;
+}
+
+.subsection-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #34495e;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.subsection-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: #3498db;
+}
+
+.distribution-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.distribution-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.distribution-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.distribution-value {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.good .progress-bar {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+}
+
+.average .progress-bar {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+.poor .progress-bar {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.models-section {
+    margin-top: 50px;
+}
+
+.model-performance-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.model-performance-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.model-card-header {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    text-align: center;
+}
+
+.model-card-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.model-card-body {
+    padding: 25px;
+}
+
+.model-metrics {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.metric-item {
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.metric-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.confusion-matrix img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.confusion-matrix img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.actions-container {
+    margin-top: 50px;
+}
+
+.actions-container .card {
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.actions-container .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.actions-container .card-body {
+    padding: 30px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.action-buttons .btn {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border: none;
+}
+
+.btn-outline-primary {
+    border: 2px solid #3498db;
+    color: #3498db;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #95a5a6;
+    color: #7f8c8d;
+}
+
+.btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .session-badge {
+        margin-top: 10px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+    }
+}
