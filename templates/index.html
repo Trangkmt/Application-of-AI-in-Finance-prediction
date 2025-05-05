@@ -135,6 +135,83 @@
     </div>
 </div>
 
+<!-- Section divider with explanation -->
+<div class="container mt-5 mb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong>Hai phương pháp phân tích:</strong> Bạn có thể phân tích một doanh nghiệp riêng lẻ bằng cách nhập thông số tài chính bên dưới, hoặc phân tích hàng loạt doanh nghiệp bằng cách tải lên file dữ liệu ở phía trên.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Single Business Prediction Card -->
+<div class="upload-container animation-fade-in">
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-building me-2"></i>
+            <h5 class="card-title mb-0">Phân tích 1 Doanh Nghiệp</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text mb-4">Nhập các chỉ số tài chính của doanh nghiệp để nhận kết quả phân tích ngay lập tức, không cần tải file lên.</p>
+            
+            <form action="/predict_one" method="post" id="predictOneForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="ROE" class="form-label">ROE (%)</label>
+                            <input type="number" class="form-control" id="ROE" name="ROE" step="0.01" required>
+                            <div class="form-text">Tỷ suất lợi nhuận trên vốn chủ sở hữu</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="ROA" class="form-label">ROA (%)</label>
+                            <input type="number" class="form-control" id="ROA" name="ROA" step="0.01" required>
+                            <div class="form-text">Tỷ suất lợi nhuận trên tổng tài sản</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="DebtEq" class="form-label">Debt/Equity</label>
+                            <input type="number" class="form-control" id="DebtEq" name="DebtEq" step="0.01" required>
+                            <div class="form-text">Tỷ lệ nợ trên vốn chủ sở hữu</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="CurrRatio" class="form-label">Current Ratio</label>
+                            <input type="number" class="form-control" id="CurrRatio" name="CurrRatio" step="0.01" required>
+                            <div class="form-text">Tỷ số thanh toán hiện hành</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="AssetTurn" class="form-label">Asset Turnover</label>
+                            <input type="number" class="form-control" id="AssetTurn" name="AssetTurn" step="0.01" required>
+                            <div class="form-text">Vòng quay tổng tài sản</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="EPS_Growth" class="form-label">EPS Growth (%)</label>
+                            <input type="number" class="form-control" id="EPS_Growth" name="EPS_Growth" step="0.01" required>
+                            <div class="form-text">Tốc độ tăng trưởng EPS</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary" id="predictBtn">
+                        <i class="bi bi-graph-up me-2"></i>Phân tích doanh nghiệp
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Loading overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner-container">

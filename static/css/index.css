@@ -130,8 +130,35 @@
     color: #17a2b8;
 }
 
+/* Section divider */
+.container .alert-info {
+    border-radius: 12px;
+    background-color: #e3f2fd;
+    border-left: 5px solid #3498db;
+    padding: 15px 20px;
+}
+
+.container .alert-info strong {
+    color: #0c5460;
+}
+
 .tab-content {
     padding: 20px 0;
+}
+
+/* Single Business Prediction Form */
+.form-group label {
+    font-weight: 500;
+}
+
+#predictOneForm .btn-primary {
+    padding: 12px 30px;
+    transition: all 0.3s ease;
+}
+
+#predictOneForm .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
 }
 
 @media (max-width: 768px) {
