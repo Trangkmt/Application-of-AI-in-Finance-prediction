@@ -1,14 +1,14 @@
 # finance_app.py  –  24-04-2025
 # ================================================================
-# • Auto-detect CSV encoding + delimiter   (chardet + csv.Sniffer)
+# • Tự động phát hiện mã hóa + dấu phân cách CSV   (chardet + csv.Sniffer)
 # • Tính thêm AssetTurn, EPS_Growth (nếu đủ cột)
-# • Gán nhãn cứng (ngưỡng nới lỏng) ⇒ 0:Poor 1:Avg 2:Good
-# • Train Logistic + RandomForest + NaiveBayes, xuất:
+# • Gán nhãn cứng (ngưỡng nới lỏng) ⇒ 0:Kém 1:Trung bình 2:Tốt
+# • Huấn luyện Logistic + RandomForest + NaiveBayes, xuất:
 #     results_classification.csv
 #     predictions_with_prob.csv
 #     cm_*.png, class_report_*.txt
 #     model_Logistic.pkl, model_RandomForest.pkl, model_NaiveBayes.pkl
-# • Web Interface: nhập 6 chỉ số hoặc chọn CSV/XLSX và train/dự đoán hàng loạt
+# • Giao diện Web: nhập 6 chỉ số hoặc chọn CSV/XLSX và huấn luyện/dự đoán hàng loạt
 # =================================================================
 import sys, csv, warnings, joblib, chardet, os
 from pathlib import Path
@@ -29,22 +29,21 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 import uuid
 from datetime import datetime
 from functools import wraps
-import gradio as gr
 
 warnings.filterwarnings("ignore")
 
 FEATURES   = ['ROE','ROA','DebtEq','CurrRatio','AssetTurn','EPS_Growth']
 MODEL_FILE = 'model_RandomForest.pkl'
 
-# Update file organization - consolidated directory structure
+# Cập nhật tổ chức tệp - cấu trúc thư mục hợp nhất
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / 'data'
 DATA_DIR.mkdir(exist_ok=True)
 DEFAULT_PREDICTIONS_FILENAME = 'predictions'
 
-# ---------- Helper function for standardized file paths ----------
+# ---------- Hàm trợ giúp cho đường dẫn tệp tiêu chuẩn hóa ----------
 def get_session_path(session_id, file_type, name=None):
-    """Generate standardized file paths for session artifacts"""
+    """Tạo đường dẫn tệp tiêu chuẩn hóa cho các sản phẩm phiên"""
     if file_type == 'eda_dir':
         return DATA_DIR / f'eda_{session_id}'
     elif file_type == 'model':
@@ -89,14 +88,14 @@ def smart_rename(df: pd.DataFrame) -> pd.DataFrame:
 # ---------- hàm gán nhãn ----------
 def build_labeler(has_AT, has_EG):
     def lab(r):
-        # ---------- GOOD ----------
+        # ---------- TỐT ----------
         good = (
             (r.ROE       >= 0.04)   &   # 4 %
             (r.ROA       >= 0.015)  &   # 1.5 %
             (r.DebtEq    <= 50)     &   # nợ ≤ 50 lần vốn
             (r.CurrRatio >= 0.6)
         )
-        # ---------- POOR ----------
+        # ---------- KÉM ----------
         poor = (
             (r.ROE       < 0.015) |
             (r.ROA       < 0.007) |
@@ -120,7 +119,7 @@ def eda_visuals(df: pd.DataFrame, session_id):
     
     cols_to_plot = [col for col in FEATURES if col in df.columns]
 
-    # 1. Correlation Heatmap
+    # 1. Ma trận tương quan
     corr = df[cols_to_plot].corr()
     plt.figure(figsize=(8, 6))
     sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
@@ -128,7 +127,7 @@ def eda_visuals(df: pd.DataFrame, session_id):
     plt.savefig(f"{eda_dir}/heatmap_correlation_{session_id}.png", dpi=300)
     plt.close()
 
-    # 2. Boxplot theo Rating (nếu có)
+    # 2. Biểu đồ hộp theo Rating (nếu có)
     if 'Rating' in df.columns:
         n = len(cols_to_plot)
         ncols = 2
@@ -148,7 +147,7 @@ def eda_visuals(df: pd.DataFrame, session_id):
         plt.savefig(f"{eda_dir}/boxplot_by_rating_{session_id}.png", dpi=300)
         plt.close()
 
-    # 3. Pairplot (nếu có Rating)
+    # 3. Biểu đồ cặp (nếu có Rating)
     if 'Rating' in df.columns and len(df) <= 1000:  # Giới hạn kích thước để tránh biểu đồ quá lớn
         sns.pairplot(df[cols_to_plot + ['Rating']], hue='Rating', palette='Set2')
         plt.savefig(f"{eda_dir}/pairplot_by_rating_{session_id}.png", dpi=300)
@@ -156,7 +155,7 @@ def eda_visuals(df: pd.DataFrame, session_id):
     
     return eda_dir
 
-# Helper to handle common route errors
+# Trình trợ giúp xử lý lỗi tuyến đường thông thường
 def handle_route_errors(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -169,9 +168,9 @@ def handle_route_errors(func):
             return redirect(url_for('index'))
     return wrapper
 
-# Helper to load analysis data
+# Trình trợ giúp tải dữ liệu phân tích
 def load_analysis_data(session_id):
-    """Load common analysis data used by multiple routes"""
+    """Tải dữ liệu phân tích chung được sử dụng bởi nhiều tuyến đường"""
     results_path = get_session_path(session_id, 'results')
     predictions_path = get_session_path(session_id, 'predictions')
     
@@ -256,7 +255,7 @@ def run_pipeline(file_path):
         plt.savefig(cm_path, dpi=300)
         plt.clf()
 
-        # Save report with consistent naming
+        # Lưu báo cáo với tên nhất quán
         report_path = get_session_path(session_id, 'report', name)
         with open(report_path, 'w') as f:
             f.write(classification_report(y_te,pred,digits=3))
@@ -286,90 +285,12 @@ def run_pipeline(file_path):
         'eda_paths': [f'/file/{session_id}/eda/{Path(p).stem}' for p in eda_path.glob('*.png')]
     }
 
-# ==================== GRADIO INTERFACE ====================
-def create_gradio_interface():
-    def greet(name):
-        return "Hello " + name + "!!"
-    
-    def predict_financial_health(roe, roa, debt_eq, curr_ratio, asset_turn, eps_growth):
-        """Make financial health prediction using latest model"""
-        try:
-            # Get the latest model file
-            model_files = list(DATA_DIR.glob('model_*_RandomForest.pkl'))
-            if not model_files:
-                return "No models found. Please train a model first."
-            
-            latest_model = sorted(model_files, key=os.path.getmtime)[-1]
-            model = joblib.load(latest_model)
-            
-            # Create input data frame
-            input_data = pd.DataFrame({
-                'ROE': [float(roe)],
-                'ROA': [float(roa)],
-                'DebtEq': [float(debt_eq)],
-                'CurrRatio': [float(curr_ratio)],
-                'AssetTurn': [float(asset_turn)], 
-                'EPS_Growth': [float(eps_growth)]
-            })
-            
-            # Make prediction
-            prediction = model.predict(input_data)[0]
-            probabilities = model.predict_proba(input_data)[0]
-            
-            # Create response
-            categories = {0: "Kém (Poor)", 1: "Trung bình (Average)", 2: "Tốt (Good)"}
-            result = f"Dự đoán: {categories[prediction]}\n\n"
-            result += "Xác suất dự đoán:\n"
-            result += f"- Kém: {probabilities[0]:.2%}\n"
-            result += f"- Trung bình: {probabilities[1]:.2%}\n"
-            result += f"- Tốt: {probabilities[2]:.2%}\n"
-            
-            return result
-        except Exception as e:
-            return f"Error: {str(e)}"
-    
-    with gr.Blocks(title="Finance AI Prediction") as demo:
-        gr.Markdown("# Dự đoán sức khỏe tài chính")
-        gr.Markdown("Nhập các chỉ số tài chính để dự đoán tình trạng doanh nghiệp")
-        
-        with gr.Row():
-            with gr.Column():
-                roe = gr.Number(label="ROE (Return on Equity)", value=0.05)
-                roa = gr.Number(label="ROA (Return on Assets)", value=0.02)
-                debt_eq = gr.Number(label="Debt to Equity Ratio", value=2.0)
-            
-            with gr.Column():
-                curr_ratio = gr.Number(label="Current Ratio", value=1.5)
-                asset_turn = gr.Number(label="Asset Turnover", value=0.7)
-                eps_growth = gr.Number(label="EPS Growth", value=0.01)
-        
-        predict_btn = gr.Button("Dự đoán")
-        output = gr.TextArea(label="Kết quả dự đoán")
-        
-        predict_btn.click(
-            fn=predict_financial_health,
-            inputs=[roe, roa, debt_eq, curr_ratio, asset_turn, eps_growth],
-            outputs=output
-        )
-        
-        # Example basic interface
-        gr.Markdown("## Test Simple Greeting")
-        name_input = gr.Textbox(label="Your Name")
-        greeting_output = gr.Textbox(label="Greeting")
-        gr.Interface(fn=greet, inputs=name_input, outputs=greeting_output)
-    
-    return demo
-
-# ==================== FLASK WEB APP ====================
+# ==================== ỨNG DỤNG FLASK WEB ====================
 app = Flask(__name__, template_folder=str(BASE_DIR / 'templates'), 
            static_folder=str(BASE_DIR / 'static'))
 app.secret_key = 'finance-analysis-secret-key'
 app.config['UPLOAD_FOLDER'] = str(DATA_DIR)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
-
-# Create and mount Gradio app
-gradio_app = create_gradio_interface()
-app = gr.mount_gradio_app(app, gradio_app, "/gradio")
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Giới hạn 16MB
 
 @app.route('/')
 def index():
@@ -378,39 +299,39 @@ def index():
 @app.route('/dashboard')
 @app.route('/dashboard/<path:session_id>')
 def dashboard(session_id=None):
-    """Show dashboard when accessing /dashboard directly"""
-    # If session_id is provided in URL, use it
+    """Hiển thị dashboard khi truy cập /dashboard trực tiếp"""
+    # Nếu session_id được cung cấp trong URL, sử dụng nó
     if session_id:
         session['analysis_session_id'] = session_id
         return redirect(url_for('analysis_dashboard', session_id=session_id))
     
-    # Otherwise check if there's a session_id in the session state
+    # Nếu không, kiểm tra xem có session_id trong trạng thái phiên không
     session_id = session.get('analysis_session_id')
     if session_id:
         return redirect(url_for('analysis_dashboard', session_id=session_id))
     else:
-        flash("No active analysis session found. Please upload a file to analyze.", "info")
+        flash("Không tìm thấy phiên phân tích đang hoạt động. Vui lòng tải lên một tệp để phân tích.", "info")
         return redirect(url_for('index'))
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        flash('No file part')
+        flash('Không có phần tệp')
         return redirect(url_for('index'))
     
     file = request.files['file']
     
     if file.filename == '':
-        flash('No selected file')
+        flash('Không có tệp được chọn')
         return redirect(url_for('index'))
     
     if file:
-        # Save uploaded file directly to DATA_DIR
+        # Lưu tệp đã tải lên trực tiếp vào DATA_DIR
         filename = str(uuid.uuid4()) + Path(file.filename).suffix
         file_path = DATA_DIR / filename
         file.save(file_path)
         
-        # Process file
+        # Xử lý tệp
         success, result = run_pipeline(file_path)
         
         if not success:
@@ -419,7 +340,7 @@ def upload_file():
         
         # Lưu session_id vào session state để phục vụ điều hướng sau này
         session_id = result['session_id']
-        session['analysis_session_id'] = session_id  # Store in session
+        session['analysis_session_id'] = session_id  # Lưu trong phiên
         session['current_analysis'] = {
             'session_id': session_id,
             'filename': file.filename,
@@ -434,10 +355,10 @@ def upload_file():
 @handle_route_errors
 def analysis_dashboard(session_id):
     """Hiển thị dashboard tích hợp với tất cả kết quả phân tích"""
-    # Store the session ID in the server-side session
+    # Lưu ID phiên trong phiên phía máy chủ
     session['analysis_session_id'] = session_id
     
-    # Load common analysis data
+    # Tải dữ liệu phân tích chung
     data = load_analysis_data(session_id)
     
     # Kiểm tra xem có biểu đồ EDA không
@@ -464,8 +385,8 @@ def analysis_dashboard(session_id):
 
 @app.route('/file/<path:session_id>/<path:filename>')
 def serve_file(session_id, filename):
-    """Serve files from data directory"""
-    # Xử lý các tệp confusion matrix
+    """Phục vụ tệp từ thư mục dữ liệu"""
+    # Xử lý các tệp ma trận nhầm lẫn
     if filename.startswith('cm_'):
         model_name = filename.replace('cm_', '')
         full_filename = f"cm_{session_id}_{model_name}.png"
@@ -481,7 +402,7 @@ def serve_file(session_id, filename):
             if eda_name in eda_file.name:
                 return send_from_directory(eda_dir, eda_file.name, as_attachment=False)
         
-        return f"EDA file not found: {eda_name}", 404
+        return f"Không tìm thấy tệp EDA: {eda_name}", 404
     
     # Xử lý các tệp CSV và tệp khác
     elif '.' in filename:
@@ -491,7 +412,7 @@ def serve_file(session_id, filename):
         full_filename = f"{filename}_{session_id}.csv"
     
     if not (DATA_DIR / full_filename).exists():
-        return f"File {full_filename} not found", 404
+        return f"Không tìm thấy tệp {full_filename}", 404
         
     return send_from_directory(DATA_DIR, full_filename, as_attachment=False)
 
@@ -500,7 +421,7 @@ def download_report(session_id, model_name):
     report_filename = f'class_report_{session_id}_{model_name}.txt'
     
     if not (DATA_DIR / report_filename).exists():
-        flash("Classification report not found")
+        flash("Không tìm thấy báo cáo phân loại")
         return redirect(url_for('index'))
     
     return send_from_directory(DATA_DIR, report_filename, as_attachment=True)
@@ -510,7 +431,7 @@ def download_csv(session_id, filename):
     file_path = get_session_path(session_id, filename)
     
     if not file_path.exists():
-        flash("File not found")
+        flash("Không tìm thấy tệp")
         return redirect(url_for('index'))
     
     return send_from_directory(DATA_DIR, file_path.name, as_attachment=True)
@@ -521,7 +442,7 @@ def download_model(session_id, model_name=None):
     model_path = get_session_path(session_id, 'model', model_name)
     
     if not model_path.exists():
-        flash("Model file not found")
+        flash("Không tìm thấy tệp mô hình")
         return redirect(url_for('index'))
     
     return send_from_directory(DATA_DIR, model_path.name, as_attachment=True)
@@ -529,7 +450,7 @@ def download_model(session_id, model_name=None):
 @app.route('/view_report/<path:session_id>/<path:model_name>')
 @handle_route_errors
 def view_report(session_id, model_name):
-    # Store the session ID in the server-side session
+    # Lưu ID phiên trong phiên phía máy chủ
     session['analysis_session_id'] = session_id
     
     report_path = get_session_path(session_id, 'report', model_name)
@@ -566,7 +487,7 @@ def view_report(session_id, model_name):
 @app.route('/view_csv/<session_id>', defaults={'filename': DEFAULT_PREDICTIONS_FILENAME})
 @handle_route_errors
 def view_csv(session_id, filename):
-    # Store the session ID in the server-side session
+    # Lưu ID phiên trong phiên phía máy chủ
     session['analysis_session_id'] = session_id
     
     csv_path = get_session_path(session_id, filename)
@@ -577,7 +498,7 @@ def view_csv(session_id, filename):
             if alt_path.exists():
                 csv_path = alt_path
             else:
-                flash(f"File not found: {filename}")
+                flash(f"Không tìm thấy tệp: {filename}")
                 return render_template('view_csv.html',
                                   data=None,
                                   filename=filename,
@@ -596,13 +517,13 @@ def training_results(session_id):
 @app.route('/view_prediction_results/<path:session_id>')
 @handle_route_errors
 def view_prediction_results(session_id):
-    # Store the session ID in the server-side session
+    # Lưu ID phiên trong phiên phía máy chủ
     session['analysis_session_id'] = session_id
     
-    # Use helper function to load analysis data
+    # Sử dụng hàm trợ giúp để tải dữ liệu phân tích
     data = load_analysis_data(session_id)
     
-    # Return the template with data
+    # Trả về mẫu với dữ liệu
     return render_template('view_prediction_results.html',
                           session_id=session_id,
                           models_data=data['models_data'],
@@ -610,7 +531,7 @@ def view_prediction_results(session_id):
                           report_paths=data['report_paths'],
                           stats=data['stats'])
 
-# ==================== ENTRY ====================
+# ==================== ĐIỂM NHẬP ====================
 if __name__=="__main__":
     if len(sys.argv) > 1 and Path(sys.argv[1]).exists():
         run_pipeline(sys.argv[1])      # huấn luyện qua Terminal
