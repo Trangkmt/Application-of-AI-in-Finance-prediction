@@ -29,6 +29,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 import uuid
 from datetime import datetime
 from functools import wraps
+import gradio as gr
 
 warnings.filterwarnings("ignore")
 
@@ -285,12 +286,90 @@ def run_pipeline(file_path):
         'eda_paths': [f'/file/{session_id}/eda/{Path(p).stem}' for p in eda_path.glob('*.png')]
     }
 
+# ==================== GRADIO INTERFACE ====================
+def create_gradio_interface():
+    def greet(name):
+        return "Hello " + name + "!!"
+    
+    def predict_financial_health(roe, roa, debt_eq, curr_ratio, asset_turn, eps_growth):
+        """Make financial health prediction using latest model"""
+        try:
+            # Get the latest model file
+            model_files = list(DATA_DIR.glob('model_*_RandomForest.pkl'))
+            if not model_files:
+                return "No models found. Please train a model first."
+            
+            latest_model = sorted(model_files, key=os.path.getmtime)[-1]
+            model = joblib.load(latest_model)
+            
+            # Create input data frame
+            input_data = pd.DataFrame({
+                'ROE': [float(roe)],
+                'ROA': [float(roa)],
+                'DebtEq': [float(debt_eq)],
+                'CurrRatio': [float(curr_ratio)],
+                'AssetTurn': [float(asset_turn)], 
+                'EPS_Growth': [float(eps_growth)]
+            })
+            
+            # Make prediction
+            prediction = model.predict(input_data)[0]
+            probabilities = model.predict_proba(input_data)[0]
+            
+            # Create response
+            categories = {0: "Kém (Poor)", 1: "Trung bình (Average)", 2: "Tốt (Good)"}
+            result = f"Dự đoán: {categories[prediction]}\n\n"
+            result += "Xác suất dự đoán:\n"
+            result += f"- Kém: {probabilities[0]:.2%}\n"
+            result += f"- Trung bình: {probabilities[1]:.2%}\n"
+            result += f"- Tốt: {probabilities[2]:.2%}\n"
+            
+            return result
+        except Exception as e:
+            return f"Error: {str(e)}"
+    
+    with gr.Blocks(title="Finance AI Prediction") as demo:
+        gr.Markdown("# Dự đoán sức khỏe tài chính")
+        gr.Markdown("Nhập các chỉ số tài chính để dự đoán tình trạng doanh nghiệp")
+        
+        with gr.Row():
+            with gr.Column():
+                roe = gr.Number(label="ROE (Return on Equity)", value=0.05)
+                roa = gr.Number(label="ROA (Return on Assets)", value=0.02)
+                debt_eq = gr.Number(label="Debt to Equity Ratio", value=2.0)
+            
+            with gr.Column():
+                curr_ratio = gr.Number(label="Current Ratio", value=1.5)
+                asset_turn = gr.Number(label="Asset Turnover", value=0.7)
+                eps_growth = gr.Number(label="EPS Growth", value=0.01)
+        
+        predict_btn = gr.Button("Dự đoán")
+        output = gr.TextArea(label="Kết quả dự đoán")
+        
+        predict_btn.click(
+            fn=predict_financial_health,
+            inputs=[roe, roa, debt_eq, curr_ratio, asset_turn, eps_growth],
+            outputs=output
+        )
+        
+        # Example basic interface
+        gr.Markdown("## Test Simple Greeting")
+        name_input = gr.Textbox(label="Your Name")
+        greeting_output = gr.Textbox(label="Greeting")
+        gr.Interface(fn=greet, inputs=name_input, outputs=greeting_output)
+    
+    return demo
+
 # ==================== FLASK WEB APP ====================
 app = Flask(__name__, template_folder=str(BASE_DIR / 'templates'), 
            static_folder=str(BASE_DIR / 'static'))
 app.secret_key = 'finance-analysis-secret-key'
 app.config['UPLOAD_FOLDER'] = str(DATA_DIR)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+
+# Create and mount Gradio app
+gradio_app = create_gradio_interface()
+app = gr.mount_gradio_app(app, gradio_app, "/gradio")
 
 @app.route('/')
 def index():
