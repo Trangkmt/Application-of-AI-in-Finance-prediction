@@ -630,6 +630,65 @@ def view_prediction_results(session_id):
                           report_paths=data['report_paths'],
                           stats=data['stats'])
 
+@app.route('/view_eda/<path:session_id>')
+@app.route('/view_eda/<path:session_id>/<path:source>')
+@handle_route_errors
+def view_eda(session_id, source='prediction'):
+    """View EDA visualizations with explanations"""
+    # Lưu ID phiên trong phiên phía máy chủ
+    session['analysis_session_id'] = session_id
+    
+    # Kiểm tra tồn tại của biểu đồ EDA
+    eda_dir = get_session_path(session_id, 'eda_dir')
+    
+    if not eda_dir.exists() or not any(eda_dir.glob('*.png')):
+        flash("Không tìm thấy biểu đồ phân tích dữ liệu", "warning")
+        return redirect(url_for('index'))
+    
+    # Lấy đường dẫn đến các biểu đồ EDA theo thứ tự nhất quán
+    eda_files = []
+    
+    # 1. Tìm biểu đồ tương quan trước
+    heatmap_files = list(eda_dir.glob('*heatmap*.png'))
+    if heatmap_files:
+        eda_files.extend(heatmap_files)
+    
+    # 2. Sau đó tìm biểu đồ hộp
+    boxplot_files = list(eda_dir.glob('*boxplot*.png'))
+    if boxplot_files:
+        eda_files.extend(boxplot_files)
+    
+    # 3. Cuối cùng tìm biểu đồ cặp
+    pairplot_files = list(eda_dir.glob('*pairplot*.png'))
+    if pairplot_files:
+        eda_files.extend(pairplot_files)
+    
+    # Thêm các file còn lại
+    for file in eda_dir.glob('*.png'):
+        if file not in eda_files:
+            eda_files.append(file)
+    
+    # Chuyển đường dẫn file thành URL cho template
+    eda_paths = [f'/file/{session_id}/eda/{Path(p).name}' for p in eda_files]
+    
+    # Tạo giải thích cho từng loại trực quan hóa
+    explanations = {}
+    for path in eda_paths:
+        if 'heatmap' in path:
+            explanations[path] = "Ma trận tương quan thể hiện mối quan hệ tương quan giữa các biến. Số càng gần 1 thể hiện mối quan hệ tương quan càng tích cực, số càng gần -1 thể hiện mối quan hệ tương quan càng tiêu cực."
+        elif 'boxplot' in path:
+            explanations[path] = "Biểu đồ hộp theo phân loại cho thấy phân phối của từng biến theo nhóm phân loại (Kém/0, Trung bình/1, Tốt/2). Điều này giúp xác định sự khác biệt về giá trị biến giữa các nhóm."
+        elif 'pairplot' in path:
+            explanations[path] = "Biểu đồ cặp hiển thị mối quan hệ giữa từng cặp biến, phân loại theo nhóm. Giúp xác định các mẫu và xu hướng trong dữ liệu theo nhóm phân loại."
+        else:
+            explanations[path] = "Biểu đồ phân tích dữ liệu."
+    
+    return render_template('view_eda.html',
+                          session_id=session_id,
+                          eda_paths=eda_paths,
+                          explanations=explanations,
+                          source=source)
+
 # ==================== ĐIỂM NHẬP ====================
 if __name__=="__main__":
     if len(sys.argv) > 1 and Path(sys.argv[1]).exists():
