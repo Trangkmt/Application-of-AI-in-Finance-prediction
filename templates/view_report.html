@@ -18,16 +18,6 @@
         </div>
     </div>
     
-    <div class="breadcrumb-navigation mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('view_prediction_results', session_id=session_id) }}">Kết quả phân tích</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ model }} - Báo cáo phân loại</li>
-            </ol>
-        </nav>
-    </div>
-    
     <!-- Metrics summary -->
     <div class="metrics-summary-card">
         <div class="card-header">
@@ -119,25 +109,7 @@
         </div>
     </div>
     
-    <!-- Actions -->
-    <div class="action-card mt-5 mb-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title"><i class="fas fa-arrow-circle-right me-2"></i> Các bước tiếp theo</h5>
-                <p class="card-text">Bạn có thể xem chi tiết dự đoán hoặc quay lại kết quả tổng quan để tiếp tục phân tích.</p>
-                <div class="action-buttons">
-                    <a href="{{ url_for('view_prediction_results', session_id=session_id) }}" class="btn btn-primary btn-action">
-                        <i class="fas fa-arrow-left me-2"></i> Quay lại kết quả
-                    </a>
-                    <a href="{{ url_for('view_csv', session_id=session_id) }}" class="btn btn-success btn-action">
-                        <i class="fas fa-table me-2"></i> Xem dự đoán chi tiết
-                    </a>
-                    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-action">
-                        <i class="fas fa-home me-2"></i> Trang chủ
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Include common actions -->
+    {% include '_common_actions.html' %}
 </div>
 {% endblock %}

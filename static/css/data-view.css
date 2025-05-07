@@ -1,0 +1,65 @@
+.full-width-container {
+    max-width: 100% !important;
+    padding: 0 15px;
+}
+
+.data-card {
+    margin-bottom: 20px;
+}
+
+.data-card .card-body {
+    padding: 0;
+    overflow: hidden;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    margin-bottom: 0;
+    max-height: 500px; /* Limit height for vertical scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    min-width: 120px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #212529; /* Match table-dark color */
+}
+
+/* Show scrollbar thumb for better UX */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}

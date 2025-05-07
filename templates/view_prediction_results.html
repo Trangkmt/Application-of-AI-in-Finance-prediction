@@ -14,15 +14,6 @@
         </div>
     </div>
 
-    <div class="breadcrumb-navigation mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Trang chủ</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Kết quả phân tích</li>
-            </ol>
-        </nav>
-    </div>
-
     <!-- Thống kê tổng quan -->
     <div class="stats-overview-card">
         <div class="card-header">
@@ -114,12 +105,6 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-4 text-center">
-                <a href="{{ url_for('view_csv', session_id=session_id) }}" class="btn btn-primary btn-lg mt-3">
-                    <i class="fas fa-table me-2"></i>Xem chi tiết dự đoán
-                </a>
-            </div>
         </div>
     </div>
 
@@ -163,6 +148,9 @@
                             <a href="{{ report_paths[loop.index0] }}" class="btn btn-outline-primary">
                                 <i class="fas fa-file-alt me-2"></i>Xem báo cáo chi tiết
                             </a>
+                            <a href="{{ url_for('download_model', session_id=session_id, model_name=model.Model) }}" class="btn btn-outline-success ms-2">
+                                <i class="fas fa-download me-2"></i>Tải mô hình {{ model.Model }}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -171,27 +159,7 @@
         </div>
     </div>
     
-    <!-- Actions -->
-    <div class="actions-container mt-5">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="card-title"><i class="fas fa-cogs me-2"></i>Thao tác</h3>
-                <div class="action-buttons">
-                    <a href="{{ url_for('view_csv', session_id=session_id, filename='predictions') }}" class="btn btn-primary">
-                        <i class="fas fa-table me-2"></i>Xem dự đoán chi tiết
-                    </a>
-                    <a href="{{ url_for('download_csv', session_id=session_id, filename='predictions') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-download me-2"></i>Tải về dữ liệu kết quả
-                    </a>
-                    <a href="{{ url_for('download_model', session_id=session_id) }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-download me-2"></i>Tải về mô hình
-                    </a>
-                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
-                        <i class="fas fa-home me-2"></i>Về trang chủ
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Include common actions -->
+    {% include '_common_actions.html' %}
 </div>
 {% endblock %}

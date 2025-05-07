@@ -1,63 +1,7 @@
 {% extends "base.html" %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-<style>
-    .upload-container {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    
-    .upload-box {
-        border: 2px dashed #dee2e6;
-        border-radius: 15px;
-        padding: 50px 30px;
-        text-align: center;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-        margin-bottom: 30px;
-    }
-    
-    .upload-box:hover {
-        border-color: #17a2b8;
-        background-color: #e9ecef;
-    }
-    
-    .upload-icon {
-        font-size: 3rem;
-        color: #6c757d;
-        margin-bottom: 15px;
-    }
-    
-    .custom-file-label::after {
-        content: "Chọn file";
-    }
-    
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 9999;
-    }
-    
-    .spinner-container {
-        text-align: center;
-        color: white;
-    }
-    
-    .spinner-border {
-        width: 4rem;
-        height: 4rem;
-        margin-bottom: 1rem;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -91,148 +35,52 @@
     </div>
     
     <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
-        <div class="upload-box">
+        <div class="upload-box" id="upload">
             <div class="upload-icon">
                 <i class="bi bi-cloud-arrow-up"></i>
             </div>
             <h3 class="mb-3">Tải lên file dữ liệu</h3>
             <div class="mb-4">
                 <input type="file" class="form-control" id="file" name="file" accept=".csv,.xlsx,.xls" required>
+                <div class="file-name mt-2 text-muted"></div>
             </div>
             <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                 <i class="bi bi-upload me-2"></i>Tải lên và phân tích
             </button>
         </div>
     </form>
-    
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-bar-chart-fill me-2"></i>Tính năng phân tích</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Phân loại dữ liệu tự động</h5>
-                        <span class="badge bg-primary">AI</span>
-                    </div>
-                    <p class="mb-1">Hệ thống sử dụng trí tuệ nhân tạo để phân loại dữ liệu theo các tiêu chí đã được huấn luyện.</p>
-                </li>
-                <li class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Báo cáo chi tiết</h5>
-                        <span class="badge bg-info">Báo cáo</span>
-                    </div>
-                    <p class="mb-1">Nhận báo cáo kết quả chi tiết với các chỉ số quan trọng và biểu đồ trực quan.</p>
-                </li>
-                <li class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Xuất kết quả</h5>
-                        <span class="badge bg-success">Xuất</span>
-                    </div>
-                    <p class="mb-1">Xuất kết quả phân tích dưới dạng CSV để sử dụng trong các ứng dụng khác.</p>
-                </li>
-            </ul>
-        </div>
-    </div>
 </div>
 
-<!-- Section divider with explanation -->
-<div class="container mt-5 mb-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                <strong>Hai phương pháp phân tích:</strong> Bạn có thể phân tích một doanh nghiệp riêng lẻ bằng cách nhập thông số tài chính bên dưới, hoặc phân tích hàng loạt doanh nghiệp bằng cách tải lên file dữ liệu ở phía trên.
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Single Business Prediction Card -->
-<div class="upload-container animation-fade-in">
-    <div class="card">
-        <div class="card-header">
-            <i class="bi bi-building me-2"></i>
-            <h5 class="card-title mb-0">Phân tích 1 Doanh Nghiệp</h5>
-        </div>
-        <div class="card-body">
-            <p class="card-text mb-4">Nhập các chỉ số tài chính của doanh nghiệp để nhận kết quả phân tích ngay lập tức, không cần tải file lên.</p>
-            
-            <form action="/predict_one" method="post" id="predictOneForm">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="ROE" class="form-label">ROE (%)</label>
-                            <input type="number" class="form-control" id="ROE" name="ROE" step="0.01" required>
-                            <div class="form-text">Tỷ suất lợi nhuận trên vốn chủ sở hữu</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="ROA" class="form-label">ROA (%)</label>
-                            <input type="number" class="form-control" id="ROA" name="ROA" step="0.01" required>
-                            <div class="form-text">Tỷ suất lợi nhuận trên tổng tài sản</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="DebtEq" class="form-label">Debt/Equity</label>
-                            <input type="number" class="form-control" id="DebtEq" name="DebtEq" step="0.01" required>
-                            <div class="form-text">Tỷ lệ nợ trên vốn chủ sở hữu</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="CurrRatio" class="form-label">Current Ratio</label>
-                            <input type="number" class="form-control" id="CurrRatio" name="CurrRatio" step="0.01" required>
-                            <div class="form-text">Tỷ số thanh toán hiện hành</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="AssetTurn" class="form-label">Asset Turnover</label>
-                            <input type="number" class="form-control" id="AssetTurn" name="AssetTurn" step="0.01" required>
-                            <div class="form-text">Vòng quay tổng tài sản</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="EPS_Growth" class="form-label">EPS Growth (%)</label>
-                            <input type="number" class="form-control" id="EPS_Growth" name="EPS_Growth" step="0.01" required>
-                            <div class="form-text">Tốc độ tăng trưởng EPS</div>
-                        </div>
-                    </div>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart-fill me-2"></i>Tính năng phân tích</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Phân loại dữ liệu tự động</h5>
+                    <span class="badge bg-primary">AI</span>
                 </div>
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary" id="predictBtn">
-                        <i class="bi bi-graph-up me-2"></i>Phân tích doanh nghiệp
-                    </button>
+                <p class="mb-1">Hệ thống sử dụng trí tuệ nhân tạo để phân loại dữ liệu theo các tiêu chí đã được huấn luyện.</p>
+            </li>
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Báo cáo chi tiết</h5>
+                    <span class="badge bg-info">Báo cáo</span>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Loading overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner-container">
-        <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Đang tải...</span>
-        </div>
-        <h4 class="mt-3">Đang xử lý dữ liệu...</h4>
-        <p>Vui lòng đợi trong giây lát</p>
+                <p class="mb-1">Nhận báo cáo kết quả chi tiết với các chỉ số quan trọng và biểu đồ trực quan.</p>
+            </li>
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Xuất kết quả</h5>
+                    <span class="badge bg-success">Xuất</span>
+                </div>
+                <p class="mb-1">Xuất kết quả phân tích dưới dạng CSV để sử dụng trong các ứng dụng khác.</p>
+            </li>
+        </ul>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-    document.getElementById('uploadForm').addEventListener('submit', function(event) {
-        // Hiển thị spinner loading
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        
-        // Disable nút submit để tránh submit nhiều lần
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
-    });
-</script>
+<script src="{{ url_for('static', filename='js/upload-handler.js') }}"></script>
 {% endblock %}

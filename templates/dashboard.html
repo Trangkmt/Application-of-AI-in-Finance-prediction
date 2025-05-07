@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script>
+  // This template redirects to the appropriate view
+  window.onload = function() {
+    var redirectUrl = "{% if session_id %}{{ url_for('analysis_dashboard', session_id=session_id) }}{% else %}{{ url_for('index') }}{% endif %}";
+    window.location.href = redirectUrl;
+  };
+</script>
+
+<div class="container mt-5">
+  <div class="alert alert-info">
+    <i class="fas fa-sync fa-spin me-2"></i>
+    Đang chuyển hướng đến trang phân tích...
+  </div>
+</div>
+{% endblock %}

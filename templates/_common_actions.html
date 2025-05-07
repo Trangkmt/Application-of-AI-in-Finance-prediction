@@ -1,0 +1,22 @@
+{% if session_id %}
+<div class="common-actions-bar section-card">
+    <h3 class="section-title">
+        <i class="fas fa-compass me-2"></i>
+        Điều hướng phân tích
+    </h3>
+    <div class="action-buttons">
+        <a href="{{ url_for('analysis_dashboard', session_id=session_id) }}" class="btn btn-outline-primary">
+            <i class="fas fa-tachometer-alt me-2"></i> Bảng điều khiển
+        </a>
+        <a href="{{ url_for('view_prediction_results', session_id=session_id) }}" class="btn btn-outline-info">
+            <i class="fas fa-brain me-2"></i> Xem chi tiết mô hình AI
+        </a>
+        <a href="{{ url_for('view_csv', session_id=session_id, filename='predictions') }}" class="btn btn-outline-success">
+            <i class="fas fa-table me-2"></i> Xem toàn bộ dữ liệu
+        </a>
+        <a href="{{ url_for('view_eda', session_id=session_id) }}" class="btn btn-outline-warning">
+            <i class="fas fa-chart-bar me-2"></i> Trực quan hóa dữ liệu
+        </a>
+    </div>
+</div>
+{% endif %}

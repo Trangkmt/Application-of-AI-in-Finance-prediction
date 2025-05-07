@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common_actions.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/eda.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="eda-container animation-fade-in">
+    <div class="header-section">
+        <h1 class="mb-3">Phân tích dữ liệu khám phá (EDA)</h1>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Phân tích dữ liệu khám phá (EDA) giúp hiểu mối quan hệ giữa các biến và ảnh hưởng của chúng đến kết quả phân loại.
+            <br>
+            <strong>Nhấp vào biểu đồ để xem phóng to.</strong>
+        </div>
+    </div>
+    
+    {% if eda_paths %}
+        {% for path in eda_paths %}
+            <div class="viz-card">
+                <div class="viz-header">
+                    <h3 class="viz-title">
+                        {% if 'heatmap' in path %}
+                            <i class="fas fa-th me-2"></i> Ma trận tương quan
+                        {% elif 'boxplot' in path %}
+                            <i class="fas fa-box-plot me-2"></i> Biểu đồ hộp theo phân loại
+                        {% elif 'pairplot' in path %}
+                            <i class="fas fa-th-large me-2"></i> Biểu đồ cặp (Pairplot)
+                        {% else %}
+                            <i class="fas fa-chart-bar me-2"></i> Biểu đồ phân tích
+                        {% endif %}
+                        <div class="float-end">
+                            <a href="{{ path }}" download class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download me-1"></i> Tải về
+                            </a>
+                        </div>
+                    </h3>
+                </div>
+                <div class="viz-body">
+                    <img src="{{ path }}" alt="Visualization" class="viz-image" onclick="openLightbox('{{ path }}')">
+                    <div class="zoom-hint">
+                        <i class="fas fa-search-plus me-1"></i> Nhấp vào hình để phóng to
+                    </div>
+                </div>
+                <div class="viz-footer">
+                    <p class="viz-explanation">
+                        {{ explanations[path] }}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Không tìm thấy biểu đồ phân tích dữ liệu cho phiên này.
+        </div>
+    {% endif %}
+    
+    <!-- Include common actions -->
+    {% include '_common_actions.html' %}
+</div>
+
+<!-- Add a lightbox div at the end of the content block -->
+<div class="lightbox" id="imageLightbox">
+    <div class="lightbox-content">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img src="" id="lightboxImage" class="lightbox-image">
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/lightbox.js') }}"></script>
+{% endblock %}
