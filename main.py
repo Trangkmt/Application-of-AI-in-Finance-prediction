@@ -16,7 +16,106 @@ import pandas as pd, numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+# Try to import seaborn, but fall back to a simple implementation if not available
+try:
+    import seaborn as sns
+    HAS_SEABORN = True
+except ImportError:
+    print("Warning: Seaborn could not be imported. Using basic matplotlib visualizations instead.")
+    HAS_SEABORN = False
+    
+    # Define minimal replacement for the required seaborn functions
+    class SeabornFallback:
+        @staticmethod
+        def heatmap(data, ax=None, annot=False, fmt='.2f', cmap='coolwarm', linewidths=0):
+            if ax is None:
+                ax = plt.gca()
+            
+            im = ax.imshow(data, cmap=cmap)
+            plt.colorbar(im, ax=ax)
+            
+            # Add annotations if requested
+            if annot:
+                for i in range(data.shape[0]):
+                    for j in range(data.shape[1]):
+                        text = format(data.iloc[i, j], fmt) if hasattr(data, 'iloc') else format(data[i, j], fmt)
+                        ax.text(j, i, text, ha='center', va='center', color='black')
+                        
+            # Set labels
+            if hasattr(data, 'index') and hasattr(data, 'columns'):
+                ax.set_xticks(np.arange(data.shape[1]))
+                ax.set_yticks(np.arange(data.shape[0]))
+                ax.set_xticklabels(data.columns)
+                ax.set_yticklabels(data.index)
+                plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+            
+            return ax
+        
+        @staticmethod
+        def boxplot(x=None, y=None, data=None, ax=None):
+            if ax is None:
+                ax = plt.gca()
+            
+            if x is not None and y is not None and data is not None:
+                # Group the data by x and create boxplots for each group
+                grouped = data.groupby(x)[y]
+                positions = range(len(grouped))
+                
+                box_data = [group[1].values for group in grouped]
+                ax.boxplot(box_data, positions=positions)
+                
+                # Set labels
+                ax.set_title(f"{y} by {x}")
+                ax.set_ylabel(y)
+                ax.set_xlabel(x)
+                ax.set_xticks(positions)
+                ax.set_xticklabels(grouped.groups.keys())
+                
+            return ax
+        
+        @staticmethod
+        def pairplot(data, hue=None, palette=None):
+            # This is a simplified version that creates a grid of scatter plots
+            if hue is not None:
+                # Get the numeric columns
+                numeric_cols = data.select_dtypes(include=[np.number]).columns.tolist()
+                if hue in numeric_cols:
+                    numeric_cols.remove(hue)
+                
+                n = len(numeric_cols)
+                fig, axes = plt.subplots(n, n, figsize=(n*3, n*3))
+                
+                # Create scatter plots
+                for i, col1 in enumerate(numeric_cols):
+                    for j, col2 in enumerate(numeric_cols):
+                        ax = axes[i, j]
+                        
+                        if i == j:  # Diagonal
+                            # Create a histogram
+                            ax.hist(data[col1], bins=20)
+                            ax.set_title(col1)
+                        else:  # Off-diagonal
+                            # Create scatter plot with colors by hue
+                            for category in data[hue].unique():
+                                subset = data[data[hue] == category]
+                                ax.scatter(subset[col2], subset[col1], label=str(category), alpha=0.5)
+                            
+                            if i == n-1:  # Bottom row
+                                ax.set_xlabel(col2)
+                            if j == 0:  # First column
+                                ax.set_ylabel(col1)
+                
+                # Add a legend to the first plot
+                handles, labels = axes[0, 1].get_legend_handles_labels()
+                fig.legend(handles, labels, title=hue, loc='upper right')
+                
+                plt.tight_layout()
+            
+            return fig
+    
+    sns = SeabornFallback()
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -148,7 +247,7 @@ def eda_visuals(df: pd.DataFrame, session_id):
         plt.close()
 
     # 3. Biểu đồ cặp (nếu có Rating)
-    if 'Rating' in df.columns and len(df) <= 1000:  # Giới hạn kích thước để tránh biểu đồ quá lớn
+    if HAS_SEABORN and 'Rating' in df.columns and len(df) <= 1000:  # Giới hạn kích thước để tránh biểu đồ quá lớn
         sns.pairplot(df[cols_to_plot + ['Rating']], hue='Rating', palette='Set2')
         plt.savefig(f"{eda_dir}/pairplot_by_rating_{session_id}.png", dpi=300)
         plt.close()
