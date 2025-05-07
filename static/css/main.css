@@ -3,7 +3,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fa;
     padding: 20px;
-    /* Add top padding to account for fixed navbar */
+    /* Thêm padding trên cùng để tính đến thanh điều hướng cố định */
     padding-top: 70px;
 }
 
@@ -63,7 +63,7 @@ body {
     width: 100%;
 }
 
-/* Analysis Navigation Styles */
+/* Kiểu dáng phân tích Navigation */
 .analysis-nav-link {
     border-radius: 20px;
     padding: 6px 15px !important;
@@ -91,13 +91,13 @@ body {
     font-size: 0.8rem;
 }
 
-/* Make sure icons are properly aligned */
+/* Đảm bảo các biểu tượng được căn chỉnh đúng */
 .analysis-nav-link i {
     margin-right: 5px;
     font-size: 0.9rem;
 }
 
-/* Make the navigation more compact on smaller screens */
+/* Làm cho thanh điều hướng gọn hơn trên màn hình nhỏ hơn */
 @media (max-width: 992px) {
     #analysis-nav {
         margin-top: 10px;
@@ -288,12 +288,12 @@ footer {
     background: linear-gradient(90deg, #3498db, #2ecc71);
 }
 
-/* Remove breadcrumb styling */
+/* Xóa kiểu dáng breadcrumb */
 .breadcrumb-navigation {
     display: none;
 }
 
-/* Table styling */
+/* Kiểu dáng bảng */
 .table-responsive {
     border-radius: 8px;
     overflow: hidden;
@@ -314,7 +314,7 @@ footer {
     background-color: rgba(0,0,0,0.02);
 }
 
-/* Responsive adjustments */
+/* Điều chỉnh đáp ứng */
 @media (max-width: 768px) {
     .container {
         padding: 10px;
