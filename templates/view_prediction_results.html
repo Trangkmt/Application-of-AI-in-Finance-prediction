@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container animation-fade-in">
+    <div class="dashboard-header">
+        <h1 class="section-title">Báo cáo kết quả phân tích</h1>
+        <div class="session-badge">
+            <span class="badge bg-primary">Mã phiên: {{ session_id }}</span>
+        </div>
+    </div>
+
+    <!-- Thống kê tổng quan -->
+    <div class="stats-overview-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-pie me-2"></i>Thống kê tổng quan</h2>
+        </div>
+        <div class="card-body">
+            <div class="row stats-container">
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card total-samples">
+                        <div class="stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{{ stats.total_samples }}</div>
+                            <div class="stat-label">Tổng số mẫu</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card avg-prob">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{{ (stats.avg_prob_good * 100)|round(1) }}%</div>
+                            <div class="stat-label">Xác suất tốt trung bình</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card download-data">
+                        <div class="stat-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stat-content">
+                            <a href="{{ url_for('download_csv', session_id=session_id, filename='predictions') }}" class="btn btn-outline-primary btn-sm">
+                                Tải dữ liệu kết quả
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phân phối phân loại -->
+            <div class="rating-distribution">
+                <h3 class="subsection-title">Phân phối phân loại</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="distribution-card good">
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ (stats.good_count/stats.total_samples*100)|round(1) }}%;" 
+                                     aria-valuenow="{{ stats.good_count }}" aria-valuemin="0" aria-valuemax="{{ stats.total_samples }}">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="distribution-label">Tốt</span>
+                                <span class="distribution-value">{{ stats.good_count }} ({{ (stats.good_count/stats.total_samples*100)|round(1) }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="distribution-card average">
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {{ (stats.avg_count/stats.total_samples*100)|round(1) }}%;" 
+                                     aria-valuenow="{{ stats.avg_count }}" aria-valuemin="0" aria-valuemax="{{ stats.total_samples }}">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="distribution-label">Trung bình</span>
+                                <span class="distribution-value">{{ stats.avg_count }} ({{ (stats.avg_count/stats.total_samples*100)|round(1) }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="distribution-card poor">
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-danger" role="progressbar" 
+                                     style="width: {{ (stats.poor_count/stats.total_samples*100)|round(1) }}%;" 
+                                     aria-valuenow="{{ stats.poor_count }}" aria-valuemin="0" aria-valuemax="{{ stats.total_samples }}">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="distribution-label">Kém</span>
+                                <span class="distribution-value">{{ stats.poor_count }} ({{ (stats.poor_count/stats.total_samples*100)|round(1) }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kết quả mô hình -->
+    <div class="models-section mt-5">
+        <h2 class="section-title"><i class="fas fa-brain me-2"></i>Hiệu suất các mô hình</h2>
+        
+        <div class="row">
+            {% for model in models_data %}
+            <div class="col-md-6 mb-4">
+                <div class="model-performance-card">
+                    <div class="model-card-header">
+                        <h3>{{ model.Model }}</h3>
+                    </div>
+                    <div class="model-card-body">
+                        <div class="model-metrics">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="metric-item">
+                                        <div class="metric-value">{{ (model.Accuracy * 100)|round(2) }}%</div>
+                                        <div class="metric-label">Độ chính xác</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="metric-item">
+                                        <div class="metric-value">{{ (model.F1_macro * 100)|round(2) }}%</div>
+                                        <div class="metric-label">Điểm F1 (Macro)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="confusion-matrix mt-4">
+                            <h4 class="text-center mb-3">Ma trận nhầm lẫn</h4>
+                            <div class="text-center">
+                                <img src="{{ cm_paths[loop.index0] }}" alt="Ma trận nhầm lẫn {{ model.Model }}" class="img-fluid">
+                            </div>
+                        </div>
+                        
+                        <div class="model-actions mt-4 text-center">
+                            <a href="{{ report_paths[loop.index0] }}" class="btn btn-outline-primary">
+                                <i class="fas fa-file-alt me-2"></i>Xem báo cáo chi tiết
+                            </a>
+                            <a href="{{ url_for('download_model', session_id=session_id, model_name=model.Model) }}" class="btn btn-outline-success ms-2">
+                                <i class="fas fa-download me-2"></i>Tải mô hình {{ model.Model }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Include common actions -->
+    {% include '_common_actions.html' %}
+</div>
+{% endblock %}

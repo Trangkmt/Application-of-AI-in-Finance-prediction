@@ -1,0 +1,47 @@
+.common-actions-bar {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.common-actions-bar:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.common-actions-bar .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.common-actions-bar .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.common-actions-bar .btn {
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.common-actions-bar .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .common-actions-bar .action-buttons {
+        flex-direction: column;
+    }
+    
+    .common-actions-bar .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

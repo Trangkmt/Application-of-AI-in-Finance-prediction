@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="upload-container animation-fade-in">
+    <h1 class="text-center mb-4 section-title">Phân tích dữ liệu AI</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                    {% if category == 'success' %}
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                    {% elif category == 'error' or category == 'danger' %}
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Hướng dẫn</h5>
+            <p class="card-text">Tải lên file CSV hoặc Excel chứa dữ liệu cần phân tích. Hệ thống sẽ tự động xử lý và hiển thị kết quả phân tích.</p>
+            <p class="card-text"><small class="text-muted">Định dạng được hỗ trợ: .csv, .xlsx, .xls</small></p>
+        </div>
+    </div>
+    
+    <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-box" id="upload">
+            <div class="upload-icon">
+                <i class="bi bi-cloud-arrow-up"></i>
+            </div>
+            <h3 class="mb-3">Tải lên file dữ liệu</h3>
+            <div class="mb-4">
+                <input type="file" class="form-control" id="file" name="file" accept=".csv,.xlsx,.xls" required>
+                <div class="file-name mt-2 text-muted"></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                <i class="bi bi-upload me-2"></i>Tải lên và phân tích
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart-fill me-2"></i>Tính năng phân tích</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Phân loại dữ liệu tự động</h5>
+                    <span class="badge bg-primary">AI</span>
+                </div>
+                <p class="mb-1">Hệ thống sử dụng trí tuệ nhân tạo để phân loại dữ liệu theo các tiêu chí đã được huấn luyện.</p>
+            </li>
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Báo cáo chi tiết</h5>
+                    <span class="badge bg-info">Báo cáo</span>
+                </div>
+                <p class="mb-1">Nhận báo cáo kết quả chi tiết với các chỉ số quan trọng và biểu đồ trực quan.</p>
+            </li>
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Xuất kết quả</h5>
+                    <span class="badge bg-success">Xuất</span>
+                </div>
+                <p class="mb-1">Xuất kết quả phân tích dưới dạng CSV để sử dụng trong các ứng dụng khác.</p>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/upload-handler.js') }}"></script>
+{% endblock %}

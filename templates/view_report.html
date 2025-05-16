@@ -1,0 +1,105 @@
+<!-- c:\Studii\ud-AI\templates\view_report.html -->
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="result-container animation-fade-in">
+    <div class="report-header-section">
+        <div class="model-badge">
+            <span class="badge bg-gradient">{{ model }}</span>
+        </div>
+        <h1 class="text-center mb-4">Báo cáo phân loại chi tiết</h1>
+        <div class="session-info">
+            <span class="session-badge">Mã phiên: {{ session_id }}</span>
+        </div>
+    </div>
+    
+    <!-- Tóm tắt các chỉ số -->
+    <div class="metrics-summary-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-line me-2"></i>Tóm tắt chỉ số</h2>
+        </div>
+        <div class="card-body">
+            <div class="visual-metrics">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="metric-box precision-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-crosshairs"></i>
+                            </div>
+                            <div class="metric-value">{{ precision }}</div>
+                            <div class="metric-label">Độ chính xác dự đoán</div>
+                            <div class="metric-desc">Tỉ lệ dự đoán đúng trong các mẫu được dự đoán</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="metric-box recall-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="metric-value">{{ recall }}</div>
+                            <div class="metric-label">Độ bao phủ</div>
+                            <div class="metric-desc">Tỉ lệ mẫu thực tế được phát hiện chính xác</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="metric-box f1-metric">
+                            <div class="metric-icon">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="metric-value">{{ f1 }}</div>
+                            <div class="metric-label">Điểm F1</div>
+                            <div class="metric-desc">Trung bình điều hòa của precision và recall</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Báo cáo chi tiết -->
+    <div class="detailed-report-section mt-5">
+        <h3 class="report-title section-title">
+            <i class="fas fa-file-alt me-2"></i> Chi tiết báo cáo phân loại
+            <div class="float-end">
+                <a href="{{ url_for('download_report', session_id=session_id, model_name=model) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-download me-2"></i> Tải về báo cáo
+                </a>
+            </div>
+        </h3>
+        
+        <div class="report-container animation-fade-in">
+            <div class="report-header">
+                <div class="report-info">
+                    <div class="badge badge-primary">Mô hình: {{ model }}</div>
+                    <div class="badge badge-info">Mã phiên: {{ session_id }}</div>
+                    <div class="badge badge-light">Ngày: {{ now.strftime('%d/%m/%Y') if now else 'Hôm nay' }}</div>
+                </div>
+            </div>
+            <pre class="report-content" id="report-content">{{ report }}</pre>
+        </div>
+        
+        <div class="report-explanation mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Giải thích báo cáo</h5>
+                    <ul class="explanation-list">
+                        <li><strong>Precision:</strong> Tỷ lệ dự đoán đúng trong các mẫu được dự đoán thuộc một lớp</li>
+                        <li><strong>Recall:</strong> Tỷ lệ mẫu của một lớp được phát hiện chính xác</li>
+                        <li><strong>F1-score:</strong> Trung bình điều hòa của Precision và Recall</li>
+                        <li><strong>Support:</strong> Số lượng mẫu thực tế của mỗi lớp</li>
+                    </ul>
+                    <p class="mb-0 mt-2"><small>Các giá trị càng gần 1.0 càng tốt. Báo cáo này giúp đánh giá hiệu suất phân loại của mô hình trên từng lớp.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bao gồm các hành động chung -->
+    {% include '_common_actions.html' %}
+</div>
+{% endblock %}
