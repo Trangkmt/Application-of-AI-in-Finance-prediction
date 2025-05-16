@@ -131,7 +131,7 @@ from functools import wraps
 
 warnings.filterwarnings("ignore")
 
-FEATURES   = ['ROE','ROA','DebtEq','CurrRatio','AssetTurn','EPS_Growth']
+FEATURES   = ['ROE','ROA','DebtEq','CurrRatio','AssetTurn']
 MODEL_FILE = 'model_RandomForest.pkl'
 
 # Cập nhật tổ chức tệp - cấu trúc thư mục hợp nhất
@@ -204,9 +204,6 @@ def build_labeler(has_AT, has_EG):
         if has_AT:   # chưa có AssetTurn, nhưng giữ cho tương lai
             good &= (r.AssetTurn >= 0.10)
             poor |= (r.AssetTurn < 0.03)
-        if has_EG:   # chưa có EPS_Growth
-            good &= (r.EPS_Growth >= 0.01)
-            poor |= (r.EPS_Growth < -0.07)
         return 2 if good else 0 if poor else 1
     return lab
 
