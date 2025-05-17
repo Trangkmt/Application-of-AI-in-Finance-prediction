@@ -308,16 +308,12 @@ def run_pipeline(file_path):
     # tính thêm cột
     if 'AssetTurn' not in df.columns and {'Revenue','Assets'}.issubset(df.columns):
         df['AssetTurn']=df['Revenue']/df['Assets']
-    if 'EPS' in df.columns:
-        df['EPS_Growth']=df.groupby('shortName')['EPS'].pct_change().fillna(0)
-    else:
-        df['EPS_Growth']=0.0
 
     feats=[f for f in FEATURES if f in df.columns]
     df=df.dropna(subset=feats)
 
     if 'Rating' not in df.columns:
-        df['Rating']=df.apply(build_labeler('AssetTurn'in feats,'EPS_Growth'in feats),axis=1)
+        df['Rating']=df.apply(build_labeler('AssetTurn'in feats, False),axis=1)
 
     X,y=df[feats],df['Rating']
     X_tr,X_te,y_tr,y_te=train_test_split(X,y,test_size=.2,stratify=y,random_state=42)
