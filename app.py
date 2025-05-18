@@ -303,43 +303,19 @@ def run_pipeline(file_path):
         return False, f"❌ File không tồn tại: {p}"
 
     df = read_any_csv(p) if p.suffix.lower()=='.csv' else pd.read_excel(p)
-    
-    # Kiểm tra đầy đủ các trường tài chính
-    missing_fields, column_mapping = validate_financial_data(df)
-    if missing_fields:
-        return False, f"❌ Dữ liệu tài chính không đầy đủ: Thiếu {len(missing_fields)} trường: {', '.join(missing_fields[:10])}{'...' if len(missing_fields) > 10 else ''}. File cần có đầy đủ các trường tài chính chuẩn."
-    
-    # Đổi tên các cột theo định dạng chuẩn
-    df = df.rename(columns=column_mapping)
     df = smart_rename(df)
 
     # tính thêm cột
     if 'AssetTurn' not in df.columns and {'Revenue','Assets'}.issubset(df.columns):
         df['AssetTurn']=df['Revenue']/df['Assets']
 
-    # Kiểm tra xem tất cả các trường bắt buộc cho phân tích có tồn tại không
     feats=[f for f in FEATURES if f in df.columns]
-    missing_features = [f for f in FEATURES if f not in df.columns]
-    
-    if missing_features:
-        return False, f"❌ Dữ liệu không hợp lệ cho phân tích: Thiếu các trường bắt buộc: {', '.join(missing_features)}. Vui lòng đảm bảo dữ liệu có đầy đủ các trường: {', '.join(FEATURES)}."
-    
     df=df.dropna(subset=feats)
-
-    # Kiểm tra nếu dữ liệu sau khi loại bỏ các dòng có giá trị NaN còn quá ít
-    if len(df) < 10:  # Giả sử cần ít nhất 10 dòng để phân tích có ý nghĩa
-        return False, f"❌ Dữ liệu không đủ: Sau khi loại bỏ các dòng có giá trị thiếu, chỉ còn {len(df)} dòng dữ liệu. Cần ít nhất 10 dòng để phân tích."
 
     if 'Rating' not in df.columns:
         df['Rating']=df.apply(build_labeler('AssetTurn'in feats, False),axis=1)
 
     X,y=df[feats],df['Rating']
-    
-    # Kiểm tra phân phối nhãn, đảm bảo mỗi lớp có ít nhất một mẫu
-    if len(set(y)) < 3:
-        missing_classes = set([0, 1, 2]) - set(y)
-        return False, f"❌ Dữ liệu không cân bằng: Thiếu mẫu cho các lớp: {missing_classes}. Cần có mẫu cho tất cả 3 lớp (0: Kém, 1: Trung bình, 2: Tốt)."
-    
     X_tr,X_te,y_tr,y_te=train_test_split(X,y,test_size=.2,stratify=y,random_state=42)
     
     session_id = str(uuid.uuid4())[:8]
@@ -441,44 +417,31 @@ def upload_file():
         flash('Không có tệp được chọn')
         return redirect(url_for('index'))
     
-    # Kiểm tra định dạng file
-    file_ext = Path(file.filename).suffix.lower()
-    valid_extensions = ['.csv', '.xlsx', '.xls']
-    
-    if file_ext not in valid_extensions:
-        flash(f"❌ Định dạng file không được hỗ trợ: {file_ext}. Vui lòng tải lên file CSV hoặc Excel (.csv, .xlsx, .xls)", "danger")
-        return redirect(url_for('index'))
-    
     if file:
         # Lưu tệp đã tải lên trực tiếp vào DATA_DIR
-        filename = str(uuid.uuid4()) + file_ext
+        filename = str(uuid.uuid4()) + Path(file.filename).suffix
         file_path = DATA_DIR / filename
         file.save(file_path)
         
-        try:
-            # Xử lý tệp
-            success, result = run_pipeline(file_path)
-            
-            if not success:
-                flash(result, "danger")
-                return redirect(url_for('index'))
-            
-            # Lưu session_id vào session state để phục vụ điều hướng sau này
-            session_id = result['session_id']
-            session['analysis_session_id'] = session_id  # Lưu trong phiên
-            session['current_analysis'] = {
-                'session_id': session_id,
-                'filename': file.filename,
-                'timestamp': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'features': FEATURES
-            }
-            
-            # Chuyển hướng đến trang analysis_dashboard với kết quả phân tích trực quan
-            return redirect(url_for('analysis_dashboard', session_id=session_id))
-        except Exception as e:
-            # Xử lý lỗi trong quá trình đọc file
-            flash(f"❌ Không thể xử lý file: {str(e)}. Vui lòng kiểm tra nội dung file và đảm bảo đúng định dạng.", "danger")
+        # Xử lý tệp
+        success, result = run_pipeline(file_path)
+        
+        if not success:
+            flash(result, "danger")
             return redirect(url_for('index'))
+        
+        # Lưu session_id vào session state để phục vụ điều hướng sau này
+        session_id = result['session_id']
+        session['analysis_session_id'] = session_id  # Lưu trong phiên
+        session['current_analysis'] = {
+            'session_id': session_id,
+            'filename': file.filename,
+            'timestamp': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'features': FEATURES
+        }
+        
+        # Chuyển hướng đến trang analysis_dashboard với kết quả phân tích trực quan
+        return redirect(url_for('analysis_dashboard', session_id=session_id))
 
 @app.route('/analysis_dashboard/<path:session_id>')
 @handle_route_errors
@@ -719,46 +682,9 @@ def view_eda(session_id, source='prediction'):
                           explanations=explanations,
                           source=source)
 
-# Danh sách đầy đủ các trường tài chính cần có
-REQUIRED_FINANCIAL_FIELDS = [
-    'ebitdaMargins', 'profitMargins', 'grossMargins', 'operatingCashflow', 
-    'revenueGrowth', 'operatingMargins', 'ebitda', 'grossProfits', 
-    'freeCashflow', 'currentPrice', 'earningsGrowth', 'currentRatio', 
-    'returnOnAssets', 'debtToEquity', 'returnOnEquity', 'totalCash', 
-    'totalDebt', 'totalRevenue', 'totalCashPerShare', 'financialCurrency', 
-    'revenuePerShare', 'quickRatio', 'quoteType', 'symbol', 
-    'enterpriseToRevenue', 'enterpriseToEbitda', 'forwardEps', 
-    'sharesOutstanding', 'bookValue', 'trailingEps', 'priceToBook', 
-    'heldPercentInsiders', 'enterpriseValue', 'earningsQuarterlyGrowth', 
-    'pegRatio', 'forwardPE', 'marketCap'
-]
-
-# Hàm kiểm tra đầy đủ các trường tài chính
-def validate_financial_data(df):
-    """Kiểm tra xem dữ liệu có đầy đủ các trường tài chính cần thiết không"""
-    # Chuyển đổi tất cả các tên cột thành chữ thường để so sánh không phân biệt hoa thường
-    lower_columns = [col.lower() for col in df.columns]
-    
-    # Tạo ánh xạ từ tên cột trong tệp dữ liệu đến tên cột chuẩn
-    column_mapping = {}
-    for field in REQUIRED_FINANCIAL_FIELDS:
-        field_lower = field.lower()
-        # Tìm tên cột tương ứng trong dữ liệu
-        matching_cols = [col for i, col in enumerate(df.columns) 
-                         if lower_columns[i] == field_lower or 
-                         field_lower in lower_columns[i]]
-        if matching_cols:
-            column_mapping[field] = matching_cols[0]
-    
-    # Kiểm tra các trường còn thiếu
-    missing_fields = [field for field in REQUIRED_FINANCIAL_FIELDS 
-                     if field not in column_mapping]
-    
-    return missing_fields, column_mapping
-
 # ==================== ĐIỂM NHẬP ====================
 if __name__=="__main__":
     if len(sys.argv) > 1 and Path(sys.argv[1]).exists():
         run_pipeline(sys.argv[1])      # huấn luyện qua Terminal
     else:
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        app.run(debug=True, host='0.0.0.0', port=5002)
